@@ -1,0 +1,6 @@
+#!/bin/sh
+
+sudo ip link set {{ ids_intf }} up
+sudo ethtool --offload {{ ids_intf }} rx off tx off
+sudo ip link set {{ ids_intf }} promisc on
+sudo ldconfig

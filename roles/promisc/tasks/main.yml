@@ -1,0 +1,78 @@
+---
+- name: Remove version line from netplan conf 22.04
+  when: ansible_facts['distribution_version'] == "22.04"
+  ansible.builtin.lineinfile:
+    path: /etc/netplan/00-installer-config.yaml
+    state: absent
+    regexp: 'version: 2'
+  become: yes
+- name: Add IDS interface block (and version) to end of netplan conf 22.04
+  when: ansible_facts['distribution_version'] == "22.04"
+  ansible.builtin.blockinfile:
+    path: /etc/netplan/00-installer-config.yaml
+    state: present
+    insertafter: EOF
+    block: |
+      '    {{ ids_intf }}: {}'
+      '  version: 2'
+  become: yes
+- name: Clean up single quotes from blockinfile command 22.04
+  when: ansible_facts['distribution_version'] == "22.04"
+  ansible.builtin.replace:
+    path: /etc/netplan/00-installer-config.yaml
+    regexp: "'"
+    replace: ""
+  become: yes
+- name: Remove version line from netplan conf 24.04
+  when: ansible_facts['distribution_version'] == "24.04"
+  ansible.builtin.lineinfile:
+    path: /etc/netplan/50-cloud-init.yaml
+    state: absent
+    regexp: 'version: 2'
+  become: yes
+- name: Add IDS interface block (and version) to end of netplan conf 24.04
+  when: ansible_facts['distribution_version'] == "24.04"
+  ansible.builtin.blockinfile:
+    path: /etc/netplan/50-cloud-init.yaml
+    state: present
+    insertafter: EOF
+    block: |
+      '    {{ ids_intf }}: {}'
+      '  version: 2'
+  become: yes
+- name: Clean up single quotes from blockinfile command 24.04
+  when: ansible_facts['distribution_version'] == "24.04"
+  ansible.builtin.replace:
+    path: /etc/netplan/50-cloud-init.yaml
+    regexp: "'"
+    replace: ""
+  become: yes
+- name: Create /opt/scripts directory
+  ansible.builtin.file:
+    path: /opt/scripts
+    state: directory
+    mode: '0755'
+  become: yes
+- name: Create the interface prep shell script using ids_intf variable
+  ansible.builtin.template:
+    src: intf_prep.sh.j2
+    dest: /opt/scripts/intf_prep.sh
+    owner: root
+    group: root
+    mode: 0770
+  become: yes
+- name: Create systemd service file for intf prep
+  ansible.builtin.template:
+    src: systemd-promisc.j2 
+    dest: /lib/systemd/system/promisc-interface.service
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+- name: enable new promisc-interface.service
+  ansible.builtin.shell: systemctl enable promisc-interface
+  become: yes
+- name: start new promisc-interface.service
+  ansible.builtin.shell: systemctl start promisc-interface
+  become: yes
+# tasks file for promisc

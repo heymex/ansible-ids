@@ -1,0 +1,9 @@
+---
+- hosts: ids
+  vars_files:
+    - secrets.yml 
+  roles:
+    - base
+    - promisc
+    - zeek
+

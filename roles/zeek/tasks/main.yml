@@ -1,0 +1,60 @@
+---
+- name: Download Zeek Repo GPG Key Ubuntu 22.04
+  when: ansible_facts['distribution_version'] == "22.04" 
+  ansible.builtin.get_url:
+    url: https://download.opensuse.org/repositories/security:zeek/xUbuntu_22.04/Release.key 
+    dest: /tmp/zeek-repo.key
+  become: yes
+
+- name: Download Zeek Repo GPG Key Ubuntu 24.04
+  when: ansible_facts['distribution_version'] == "24.04"
+  ansible.builtin.get_url:
+    url: https://download.opensuse.org/repositories/security:zeek/xUbuntu_24.04/Release.key
+    dest: /tmp/zeek-repo.key
+  become: yes
+
+- name: Add GPG key for OpenSUSE Zeek Repo
+  ansible.builtin.shell: cat /tmp/zeek-repo.key | gpg --dearmor | tee /etc/apt/trusted.gpg.d/security_zeek.gpg > /dev/null
+    #warn: false
+  become: yes
+
+- name: Add OpenSUSE Zeek Repo
+  ansible.builtin.apt_repository:
+    repo: 'deb http://download.opensuse.org/repositories/security:/zeek/xUbuntu_22.04/ /'
+  become: yes
+
+- name: Install zeek
+  apt:
+    name: "zeek"
+    state: latest
+      #  notify:
+      #    - zeek_log_json
+      #    - set_ids_intf
+      #    - zeekctl_deploy
+      #    - check_zeek_process
+      #    - display_zeek_process
+  become: yes
+
+- name: zeek_log_json
+  ansible.builtin.lineinfile:
+    path: /opt/zeek/share/zeek/site/local.zeek
+    insertafter: EOF
+    line: "@load policy/tuning/json-logs.zeek"
+  become: yes
+
+- name: set_ids_intf
+  ansible.builtin.lineinfile:
+    path: /opt/zeek/etc/node.cfg
+    regexp: '^interface='
+    line: interface={{ ids_intf }}
+  become: yes
+
+- name: zeekctl_deploy
+  ansible.builtin.shell: /opt/zeek/bin/zeekctl deploy
+  notify:
+    - check_zeek_process
+    - display_zeek_process
+  become: yes
+
+
+# tasks file for zeek

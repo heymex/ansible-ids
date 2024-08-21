@@ -1,0 +1,12 @@
+[Unit]
+Description=make that ids interface do its thang
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=Oneshot
+User=root
+ExecStart=/opt/scripts/intf_prep.sh
+
+[Install]
+WantedBy=multi-user.target

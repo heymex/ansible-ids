@@ -1,0 +1,4 @@
+ansible_connection: ssh
+ansible_user: "{{ ansible_host_user }}"
+ansible_ssh_pass: "{{ ansible_host_password }}"
+ansible_sudo_pass: "{{ ansible_host_password }}"

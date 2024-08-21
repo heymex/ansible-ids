@@ -1,0 +1,28 @@
+---
+- name: zeek_log_json 
+  ansible.builtin.lineinfile:
+    path: /opt/zeek/share/zeek/site/local.zeek 
+    insertafter: EOF      
+    line: "@load policy/tuning/json-logs.zeek" 
+  become: yes
+
+- name: zeekctl_deploy
+  ansible.builtin.shell: /opt/zeek/bin/zeekctl deploy
+  become: yes
+
+- name: check_zeek_process
+  ansible.builtin.shell: ps aux | grep 'zeek' | grep -v grep
+  register: zeek_process_status
+  failed_when: zeek_process_status.rc != 0
+
+- name: display_zeek_process
+  ansible.builtin.debug:
+    var: zeek_process_status.stdout_lines
+
+- name: set_ids_intf
+  ansible.builtin.lineinfile:
+    path: /opt/zeek/etc/node.cfg
+    regexp: '^interface='
+    line: interface={{ ids_intf }}
+  become: yes
+# handlers file for zeek

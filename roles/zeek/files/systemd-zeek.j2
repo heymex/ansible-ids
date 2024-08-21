@@ -1,0 +1,12 @@
+[Unit]
+Description=zeek -- metadata all the things!!
+After=promisc-interface.service
+
+[Service]
+Type=forking
+PIDFile=/opt/zeek/spool/zeek/.pid
+ExecStart=/opt/zeek/bin/zeekctl deploy
+ExecStop=/opt/zeek/bin/zeekctl stop
+
+[Install]
+WantedBy=multi-user.target

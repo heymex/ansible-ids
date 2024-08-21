@@ -1,0 +1,25 @@
+---
+- name: Update all packages to their latest version
+  apt:
+    name: "*"
+    state: latest
+  become: yes
+- name: Remove useless packages from the cache
+  apt:
+    autoclean: yes
+  become: yes
+- name: Remove dependencies that are no longer required
+  apt:
+    autoremove: yes
+  become: yes
+- name: Install plocate 
+  apt:
+    name: "plocate"
+    state: latest
+  become: yes
+- name: Install net-tools
+  apt:
+    name: "net-tools"
+    state: latest
+  become: yes
+# tasks file for base
